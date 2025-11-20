@@ -3,6 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const loginForm = document.getElementById("login-form");
+  const loginMessage = document.getElementById("login-message");
+  const userInfo = document.getElementById("user-info");
+  const currentUserEmail = document.getElementById("current-user-email");
+  const viewScheduleBtn = document.getElementById("view-schedule-btn");
+  const scheduleContainer = document.getElementById("schedule-container");
+  const scheduleList = document.getElementById("schedule-list");
+  const activitiesContainer = document.getElementById("activities-container");
+  const signupContainer = document.getElementById("signup-container");
+  const backToActivitiesBtn = document.getElementById("back-to-activities-btn");
+
+  let loggedInUser = null;
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -12,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Clear loading message
       activitiesList.innerHTML = "";
+
+      // Clear activity select
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -67,6 +82,90 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Function to fetch user schedule
+  async function fetchUserSchedule(email) {
+    try {
+      const response = await fetch(`/users/${encodeURIComponent(email)}/schedule`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch schedule");
+      }
+
+      const data = await response.json();
+
+      // Clear schedule list
+      scheduleList.innerHTML = "";
+
+      if (data.schedule.length === 0) {
+        scheduleList.innerHTML = "<p>You are not enrolled in any activities yet.</p>";
+      } else {
+        data.schedule.forEach((activity) => {
+          const activityCard = document.createElement("div");
+          activityCard.className = "activity-card";
+          activityCard.innerHTML = `
+            <h4>${activity.name}</h4>
+            <p>${activity.description}</p>
+            <p><strong>Schedule:</strong> ${activity.schedule}</p>
+          `;
+          scheduleList.appendChild(activityCard);
+        });
+      }
+
+      // Show schedule container, hide others
+      scheduleContainer.classList.remove("hidden");
+      activitiesContainer.classList.add("hidden");
+      signupContainer.classList.add("hidden");
+    } catch (error) {
+      showMessage(loginMessage, "Failed to load schedule. Please try again.", "error");
+      console.error("Error fetching schedule:", error);
+    }
+  }
+
+  // Handle login form submission
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById("login-email").value;
+
+    try {
+      const response = await fetch(
+        `/users/login?email=${encodeURIComponent(email)}`,
+        {
+          method: "POST",
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        loggedInUser = result.user;
+        currentUserEmail.textContent = loggedInUser.email;
+        userInfo.classList.remove("hidden");
+        loginForm.classList.add("hidden");
+        showMessage(loginMessage, result.message, "success");
+      } else {
+        showMessage(loginMessage, result.detail || "An error occurred", "error");
+      }
+    } catch (error) {
+      showMessage(loginMessage, "Failed to login. Please try again.", "error");
+      console.error("Error logging in:", error);
+    }
+  });
+
+  // View schedule button handler
+  viewScheduleBtn.addEventListener("click", () => {
+    if (loggedInUser) {
+      fetchUserSchedule(loggedInUser.email);
+    }
+  });
+
+  // Back to activities button handler
+  backToActivitiesBtn.addEventListener("click", () => {
+    scheduleContainer.classList.add("hidden");
+    activitiesContainer.classList.remove("hidden");
+    signupContainer.classList.remove("hidden");
+  });
+
   // Handle unregister functionality
   async function handleUnregister(event) {
     const button = event.target;
@@ -86,26 +185,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
-        messageDiv.textContent = result.message;
-        messageDiv.className = "success";
+        showMessage(messageDiv, result.message, "success");
 
         // Refresh activities list to show updated participants
         fetchActivities();
       } else {
-        messageDiv.textContent = result.detail || "An error occurred";
-        messageDiv.className = "error";
+        showMessage(messageDiv, result.detail || "An error occurred", "error");
       }
-
-      messageDiv.classList.remove("hidden");
-
-      // Hide message after 5 seconds
-      setTimeout(() => {
-        messageDiv.classList.add("hidden");
-      }, 5000);
     } catch (error) {
-      messageDiv.textContent = "Failed to unregister. Please try again.";
-      messageDiv.className = "error";
-      messageDiv.classList.remove("hidden");
+      showMessage(messageDiv, "Failed to unregister. Please try again.", "error");
       console.error("Error unregistering:", error);
     }
   }
@@ -130,30 +218,31 @@ document.addEventListener("DOMContentLoaded", () => {
       const result = await response.json();
 
       if (response.ok) {
-        messageDiv.textContent = result.message;
-        messageDiv.className = "success";
+        showMessage(messageDiv, result.message, "success");
         signupForm.reset();
 
         // Refresh activities list to show updated participants
         fetchActivities();
       } else {
-        messageDiv.textContent = result.detail || "An error occurred";
-        messageDiv.className = "error";
+        showMessage(messageDiv, result.detail || "An error occurred", "error");
       }
-
-      messageDiv.classList.remove("hidden");
-
-      // Hide message after 5 seconds
-      setTimeout(() => {
-        messageDiv.classList.add("hidden");
-      }, 5000);
     } catch (error) {
-      messageDiv.textContent = "Failed to sign up. Please try again.";
-      messageDiv.className = "error";
-      messageDiv.classList.remove("hidden");
+      showMessage(messageDiv, "Failed to sign up. Please try again.", "error");
       console.error("Error signing up:", error);
     }
   });
+
+  // Helper function to show messages
+  function showMessage(element, text, type) {
+    element.textContent = text;
+    element.className = type;
+    element.classList.remove("hidden");
+
+    // Hide message after 5 seconds
+    setTimeout(() => {
+      element.classList.add("hidden");
+    }, 5000);
+  }
 
   // Initialize app
   fetchActivities();
