@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Mergington High School</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Mergington High School</h1>
+      <h2>Admin Dashboard</h2>
+      <div class="header-nav">
+        <a href="index.html" class="nav-link">← Back to Activities</a>
+      </div>
+    </header>
+
+    <main class="admin-container">
+      <!-- Admin ID Input -->
+      <section id="admin-auth" class="admin-section">
+        <h3>Admin Authentication</h3>
+        <div class="form-group">
+          <label for="admin-id">Admin ID:</label>
+          <input type="text" id="admin-id" placeholder="Enter your admin ID" />
+          <button id="verify-admin">Verify Access</button>
+        </div>
+        <div id="auth-message" class="hidden"></div>
+      </section>
+
+      <!-- Dashboard Content (hidden until authenticated) -->
+      <div id="dashboard-content" class="hidden">
+        <!-- Statistics Cards -->
+        <section id="stats-section" class="admin-section">
+          <h3>System Statistics</h3>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="total-students">-</div>
+              <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="total-activities">-</div>
+              <div class="stat-label">Total Activities</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="total-enrollments">-</div>
+              <div class="stat-label">Total Enrollments</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="capacity-utilization">-</div>
+              <div class="stat-label">Capacity Utilization</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Popular Activities -->
+        <section id="popular-activities-section" class="admin-section">
+          <h3>Popular Activities</h3>
+          <div id="popular-activities-table">
+            <p>Loading...</p>
+          </div>
+        </section>
+
+        <!-- User Management -->
+        <section id="users-section" class="admin-section">
+          <h3>User Management</h3>
+          <div id="users-table">
+            <p>Loading...</p>
+          </div>
+        </section>
+
+        <!-- Activity Management -->
+        <section id="activity-management-section" class="admin-section">
+          <h3>Activity Management</h3>
+          <div class="activity-actions">
+            <button id="create-activity-btn" class="btn-primary">Create New Activity</button>
+          </div>
+          
+          <!-- Create Activity Form -->
+          <div id="create-activity-form" class="hidden">
+            <h4>Create New Activity</h4>
+            <form id="activity-form">
+              <div class="form-group">
+                <label for="activity-name">Activity Name:</label>
+                <input type="text" id="activity-name" required />
+              </div>
+              <div class="form-group">
+                <label for="activity-description">Description:</label>
+                <textarea id="activity-description" required rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="activity-schedule">Schedule:</label>
+                <input type="text" id="activity-schedule" required placeholder="e.g., Mondays, 3:30 PM - 5:00 PM" />
+              </div>
+              <div class="form-group">
+                <label for="activity-capacity">Max Participants:</label>
+                <input type="number" id="activity-capacity" required min="1" />
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Create Activity</button>
+                <button type="button" id="cancel-create" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div id="activity-message" class="hidden"></div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2023 Mergington High School - Admin Panel</p>
+    </footer>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
